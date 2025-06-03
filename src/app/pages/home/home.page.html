@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <div class="mobile-header">
+      <!-- Foto de perfil centrada -->
+      <div class="profile-container" (click)="fileInput.click()"> Subir foto
+        <img *ngIf="profileUrl" [src]="profileUrl" alt="Foto de perfil" class="profile-image">
+        <div *ngIf="!profileUrl" class="profile-placeholder">
+          <ion-icon name="camera" class="camera-icon">📷</ion-icon>
+        </div>
+        <input #fileInput type="file" accept="image/*" (change)="uploadProfileImage($event)" hidden>
+      </div>
+      
+      <!-- Texto de bienvenida -->
+      <div class="welcome-container">
+        <p class="welcome-text">Bienvenido</p>
+        <p class="username">{{ user?.email }}</p>
+      </div>
+      
+      <!-- Botón de logout (arriba a la derecha) -->
+      <ion-button class="logout-btn" fill="clear" (click)="logout()">Salir
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+
+
+<ion-content class="chat-content">
+  <div class="messages-container">
+    <div class="message-bubble sent" *ngFor="let message of messages">
+      <div class="message-metadata">{{ message.username }}</div>
+
+      <div class="message-content">
+
+        <!-- Si el mensaje contiene un link de Google Maps -->
+        <ng-container *ngIf="message.image_url && message.image_url.includes('maps.google.com'); then mapLink else checkImage"></ng-container>
+
+        <!-- Mostrar link a ubicación -->
+        <ng-template #mapLink>
+          <a [href]="message.image_url" target="_blank">📍 Ver ubicación</a>
+        </ng-template>
+
+        <!-- Mostrar imagen si hay image_url (fotos, imágenes API, etc.) -->
+        <ng-template #checkImage>
+          <ng-container *ngIf="message.image_url; else textMessage">
+            <img
+              [src]="message.image_url"
+              alt="Imagen enviada"
+              style="max-width: 100%; height: 200px"
+            />
+          </ng-container>
+        </ng-template>
+
+        <!-- Mostrar mensaje de texto si no hay image_url -->
+        <ng-template #textMessage>
+          <div class="message-text">{{ message.content }}</div>
+        </ng-template>
+
+        <!-- Mostrar hora del mensaje -->
+        <div class="message-time">
+          {{ message.created_at | date: 'shortTime' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <div class="chat-footer">
+    <input
+      type="text"
+      class="message-input"
+      [(ngModel)]="newMessage"
+      placeholder="Escribe tu mensaje..."
+    />
+
+    <div class="icon-buttons">
+
+      <button class="footer-icon" (click)="getCurrentLocation()" title="Ubicación">
+        🗺️
+      </button>
+
+      <button class="footer-icon" (click)="takePhoto()" title="Tomar foto">
+        📷
+      </button>
+
+      <label for="file-input" class="footer-icon" title="Adjuntar archivo">📎</label>
+      <input type="file" id="file-input" (change)="uploadFile($event)" hidden />
+
+      <button class="footer-icon" (click)="fetchAndSendApiMessage()" title="Imagen de perro">
+        🐶
+      </button>
+    </div>
+
+    <button class="send-button" (click)="sendMessage()">Enviar</button>
+  </div>
+</ion-footer>
